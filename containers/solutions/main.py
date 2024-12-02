@@ -151,7 +151,7 @@ def main():
                 res_ = None
                 if not resource_data.get("id"):
                     res_ = create(
-                        org_id=org_object.get("spec").get("id"), data=resource_data
+                        org_id=org_object.get("spec", {}).get("id", ""), data=resource_data
                     )
                     custom_resource["spec"]["id"] = res_.get("id")
                 try:
