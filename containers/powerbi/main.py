@@ -260,7 +260,7 @@ def main():
             # Extract key-value pairs from the custom resource spec
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
-            if event_type == "ADDED" or event_type == "MODIFIED":
+            if event_type == "ADDED":
                 params = resource_data.get("parameters", [])
                 report_obj = upload(
                     workspace_id=resource_data.get("workspaceId"),

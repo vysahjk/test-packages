@@ -190,9 +190,9 @@ def main():
                             )
                             name = str(uuid4())
                             parameters = DatabasePrincipalAssignment(
-                                principal_id=per.get("principalId"),
-                                principal_type=per.get("principalType"),
-                                role=per.get("role"),
+                                principal_id=per.get("principalId", ""),
+                                principal_type=per.get("principalType", ""),
+                                role=per.get("role", ""),
                                 tenant_id=os.environ.get("TENANT_ID"),
                             )
                             kusto_client.database_principal_assignments.begin_create_or_update(
@@ -266,7 +266,9 @@ def main():
                     )
                     kusto_client_new = KustoClient(kcsb=kbsc)
 
-                    batching_policy = json.dumps({"MaximumBatchingTimeSpan": "00:00:10"})
+                    batching_policy = json.dumps(
+                        {"MaximumBatchingTimeSpan": "00:00:10"}
+                    )
                     script_content = f"""
     .execute database script <|
     //
@@ -294,10 +296,10 @@ def main():
                     for cn in resource_data.get("connectors"):
                         eventhub_id = f"/subscriptions/{subscription}/"
                         eventhub_id += f"resourceGroups/{resource_group_name}/"
+                        eventhub_id += f"providers/Microsoft.EventHub/namespaces/{orga_id}-{work_key}/"
                         eventhub_id += (
-                            f"providers/Microsoft.EventHub/namespaces/{orga_id}-{work_key}/"
+                            f"eventhubs/{cn.get('connectionName', '').lower()}"
                         )
-                        eventhub_id += f"eventhubs/{cn.get("connectionName").lower()}"
                         managed_id = f"/subscriptions/{subscription}/resourceGroups/{resource_group_name}"
                         managed_id += (
                             f"/providers/Microsoft.Kusto/clusters/{adx_cluster_name}"
@@ -307,16 +309,16 @@ def main():
                             resource_group_name=resource_group_name,
                             cluster_name=adx_cluster_name,
                             database_name=database_name,
-                            data_connection_name=f"{orga_id.lower()}-{random_[0:3].lower()}-{cn.get("connectionName").lower()}",
+                            data_connection_name=f"{orga_id}-{random_[0:3]}-{cn.get('connectionName', '')}".lower(),
                             parameters=EventHubDataConnection(
-                                consumer_group=cn.get("consumerGroup"),
+                                consumer_group=cn.get("consumerGroup", ""),
                                 location=os.environ.get("LOCATION"),
                                 event_hub_resource_id=eventhub_id,
                                 data_format=cn.get("format"),
-                                compression=str(cn.get("compression")),
-                                table_name=cn.get("tableName"),
+                                compression=str(cn.get("compression", "")),
+                                table_name=cn.get("tableName", ""),
                                 managed_identity_resource_id=managed_id,
-                                mapping_rule_name=cn.get("mapping"),
+                                mapping_rule_name=cn.get("mapping", ""),
                             ),
                         ).result()
 

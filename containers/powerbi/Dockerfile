@@ -7,7 +7,7 @@ WORKDIR /
 COPY main.py .
 
 # Install required dependencies
-RUN pip install azure-identity kubernetes polling2 requests==2.31.0
+RUN pip install azure-identity kubernetes polling2
 
 # Run the Python script
 CMD ["python", "main.py"]
