@@ -283,8 +283,8 @@ def main():
                         "id"
                     )
                     link = "https://app.powerbi.com/"
-                    link += f"groups/{resource_data.get("workspaceId")}/"
-                    link += f"reports/{custom_resource["spec"]["id"]}/"
+                    link += f"groups/{resource_data.get('workspaceId')}/"
+                    link += f"reports/{custom_resource['spec']['id']}/"
                     link += "ReportSection?experience=power-bi"
                     custom_resource["spec"]["link"] = link
                 try:
