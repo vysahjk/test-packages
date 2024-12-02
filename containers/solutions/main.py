@@ -147,16 +147,16 @@ def main():
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
-                org_spec = get_org_id_by_name(organization_name=organization_name)
-                res_ = create(org_id=org_spec, data=resource_data)
+                org_object = get_org_id_by_name(organization_name=organization_name)
+                res_ = create(org_id=org_object.get("spec").get("id"), data=resource_data)
                 try:
                     del resource_data["selector"]
                     custom_resource["spec"]["id"] = res_.get("id")
-                    custom_resource["spec"]["organizationId"] = org_spec.get("id")
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["name"] = org_spec.get("metadata").get("name")
+                    custom_resource["spec"]["organizationId"] = org_object.get("spec").get("id")
+                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["name"] = org_object.get("metadata").get("name")
                     custom_resource["spec"]["metadata"]['ownerReferences'][0]["apiVersion"] = "test.cosmotech.com/v1"
                     custom_resource["spec"]["metadata"]['ownerReferences'][0]["kind"] = "Organization"
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["uid"] = org_spec.get("metadata").get("uid")
+                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["uid"] = org_object.get("metadata").get("uid")
                     custom_resource["spec"]["metadata"]['ownerReferences'][0]["blockOwerDeletion"] = True
                     api_instance.patch_namespaced_custom_object(
                         group,
@@ -170,15 +170,15 @@ def main():
                     print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
-                org_spec = get_org_id_by_name(organization_name=organization_name)
+                org_object = get_org_id_by_name(organization_name=organization_name)
                 delete_obj(
                     org_id=resource_data.get("organizationId"),
                     sol_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
-                org_spec = get_org_id_by_name(organization_name=organization_name)
+                org_object = get_org_id_by_name(organization_name=organization_name)
                 update(
-                    org_id=org_spec,
+                    org_id=org_object,
                     sol_id=resource_data.get("id"),
                     data=resource_data,
                 )
