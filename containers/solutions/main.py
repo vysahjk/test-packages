@@ -163,7 +163,7 @@ def main():
                         ownerReferences=[
                             dict(
                                 name=org_object.get("metadata").get("name"),
-                                apiVersion="test.cosmotech.com/v1",
+                                apiVersion="api.cosmotech.com/v1",
                                 kind="Organization",
                                 uid=org_object.get("metadata").get("uid"),
                                 blockOwnerDeletion=True,
