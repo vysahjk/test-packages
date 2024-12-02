@@ -153,9 +153,9 @@ def main():
                     res_ = create(
                         org_id=org_object.get("spec").get("id"), data=resource_data
                     )
+                    custom_resource["spec"]["id"] = res_.get("id")
                 try:
                     del resource_data["selector"]
-                    custom_resource["spec"]["id"] = res_.get("id")
                     custom_resource["spec"]["organizationId"] = org_object.get(
                         "spec"
                     ).get("id")
@@ -170,7 +170,6 @@ def main():
                             )
                         ]
                     )
-
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
