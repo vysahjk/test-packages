@@ -210,6 +210,10 @@ def main():
                     work_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
+                org_object = get_org_id_by_name(organization_name=organization_name)
+                custom_resource["spec"]["organizationId"] = org_object.get("spec").get("id")
+                solu_id = get_sol_id_by_name(solution_name=solution_name)
+                resource_data["solution"]["solutionId"] = solu_id
                 update(
                     org_id=resource_data.get("organizationId"),
                     work_id=resource_data.get("id"),
