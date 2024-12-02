@@ -116,7 +116,6 @@ def main():
                 res_ = create(data=resource_data)
                 try:
                     custom_resource["spec"]["id"] = res_.get("id")
-                    custom_resource["spec"]["metadata"]["finalizers"] = ["csm-finalizer/test.cosmotech.com"]
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,

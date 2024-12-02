@@ -157,7 +157,7 @@ def main():
                     custom_resource["spec"]['owerReferences'][0]["apiVersion"] = "test.cosmotech.com/v1"
                     custom_resource["spec"]['owerReferences'][0]["kind"] = "Organization"
                     custom_resource["spec"]['owerReferences'][0]["uid"] = org_spec.get("metadata").get("uid")
-                    custom_resource["spec"]['owerReferences'][0]["blockOwerDeletion"] = True
+                    custom_resource["spec"]["metadata"]['owerReferences'][0]["blockOwerDeletion"] = True
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
