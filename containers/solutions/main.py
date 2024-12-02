@@ -166,7 +166,7 @@ def main():
                                 apiVersion="test.cosmotech.com/v1",
                                 kind="Organization",
                                 uid=org_object.get("metadata").get("uid"),
-                                blockOwerDeletion=True,
+                                blockOwnerDeletion=True,
                             )
                         ],
                         **custom_resource["metadata"],
