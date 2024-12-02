@@ -153,11 +153,11 @@ def main():
                     del resource_data["selector"]
                     custom_resource["spec"]["id"] = res_.get("id")
                     custom_resource["spec"]["organizationId"] = org_object.get("spec").get("id")
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["name"] = org_object.get("metadata").get("name")
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["apiVersion"] = "test.cosmotech.com/v1"
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["kind"] = "Organization"
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["uid"] = org_object.get("metadata").get("uid")
-                    custom_resource["spec"]["metadata"]['ownerReferences'][0]["blockOwerDeletion"] = True
+                    custom_resource["metadata"]['ownerReferences'][0]["name"] = org_object.get("metadata").get("name")
+                    custom_resource["metadata"]['ownerReferences'][0]["apiVersion"] = "test.cosmotech.com/v1"
+                    custom_resource["metadata"]['ownerReferences'][0]["kind"] = "Organization"
+                    custom_resource["metadata"]['ownerReferences'][0]["uid"] = org_object.get("metadata").get("uid")
+                    custom_resource["metadata"]['ownerReferences'][0]["blockOwerDeletion"] = True
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,

@@ -113,7 +113,9 @@ def main():
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
-                res_ = create(data=resource_data)
+                res_ = None
+                if not resource_data.get("id"):
+                    res_ = create(data=resource_data)
                 try:
                     custom_resource["spec"]["id"] = res_.get("id")
                     api_instance.patch_namespaced_custom_object(
