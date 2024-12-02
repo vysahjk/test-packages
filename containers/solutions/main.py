@@ -148,16 +148,32 @@ def main():
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
                 org_object = get_org_id_by_name(organization_name=organization_name)
-                res_ = create(org_id=org_object.get("spec").get("id"), data=resource_data)
+                res_ = None
+                if not resource_data.get("id"):
+                    res_ = create(
+                        org_id=org_object.get("spec").get("id"), data=resource_data
+                    )
                 try:
                     del resource_data["selector"]
                     custom_resource["spec"]["id"] = res_.get("id")
-                    custom_resource["spec"]["organizationId"] = org_object.get("spec").get("id")
-                    custom_resource["metadata"]['ownerReferences'][0]["name"] = org_object.get("metadata").get("name")
-                    custom_resource["metadata"]['ownerReferences'][0]["apiVersion"] = "test.cosmotech.com/v1"
-                    custom_resource["metadata"]['ownerReferences'][0]["kind"] = "Organization"
-                    custom_resource["metadata"]['ownerReferences'][0]["uid"] = org_object.get("metadata").get("uid")
-                    custom_resource["metadata"]['ownerReferences'][0]["blockOwerDeletion"] = True
+                    custom_resource["spec"]["organizationId"] = org_object.get(
+                        "spec"
+                    ).get("id")
+                    custom_resource["metadata"]["ownerReferences"][0]["name"] = (
+                        org_object.get("metadata").get("name")
+                    )
+                    custom_resource["metadata"]["ownerReferences"][0][
+                        "apiVersion"
+                    ] = "test.cosmotech.com/v1"
+                    custom_resource["metadata"]["ownerReferences"][0][
+                        "kind"
+                    ] = "Organization"
+                    custom_resource["metadata"]["ownerReferences"][0]["uid"] = (
+                        org_object.get("metadata").get("uid")
+                    )
+                    custom_resource["metadata"]["ownerReferences"][0][
+                        "blockOwerDeletion"
+                    ] = True
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
@@ -172,13 +188,13 @@ def main():
             elif event_type == "DELETED":
                 org_object = get_org_id_by_name(organization_name=organization_name)
                 delete_obj(
-                    org_id=resource_data.get("organizationId"),
+                    org_id=org_object.get("spec").get("id"),
                     sol_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
                 org_object = get_org_id_by_name(organization_name=organization_name)
                 update(
-                    org_id=org_object,
+                    org_id=org_object.get("spec").get("id"),
                     sol_id=resource_data.get("id"),
                     data=resource_data,
                 )
