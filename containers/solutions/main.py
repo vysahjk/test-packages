@@ -160,6 +160,7 @@ def main():
                         "spec"
                     ).get("id")
                     custom_resource["metadata"] = dict(
+                        **custom_resource["metadata"],
                         ownerReferences=[
                             dict(
                                 name=org_object.get("metadata").get("name"),
