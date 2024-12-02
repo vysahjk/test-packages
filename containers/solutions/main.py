@@ -112,7 +112,7 @@ def get_org_id_by_name(organization_name: str):
             plural=plural,
             version=version,
         )
-        return api_response.get("spec")
+        return api_response
     except Exception as e:
         print("Exception: %s\n" % e)
 
