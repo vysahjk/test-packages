@@ -134,7 +134,7 @@ def chek_env():
         "EVENTHUB_BUILT_DATA_SENDER",
     ]:
         if e not in os.environ:
-            print(f"{e} is missing")
+            print(f"{e} is missing in triskell secret")
             sys.exit(1)
 
 
