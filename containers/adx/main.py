@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import json
 import os
+import sys
 from uuid import uuid4
 from kubernetes import client, config, watch
 from azure.identity import ClientSecretCredential
@@ -117,7 +118,28 @@ def delete_permission(principal_id: str, database_name: str):
         ).result()
 
 
+def chek_env():
+    for e in [
+        "CLIENT_ID",
+        "CLIENT_SECRET",
+        "TENANT_ID",
+        "AZURE_SUBSCRIPTION",
+        "RESOURCE_GROUP_NAME",
+        "LOCATION",
+        "API_SCOPE",
+        "API_SCOPE_POWERBI",
+        "PLATFORM_PRINCIPAL_ID",
+        "ADX_CLUSTER_NAME",
+        "EVENTHUB_BUILT_DATA_RECEIVER",
+        "EVENTHUB_BUILT_DATA_SENDER",
+    ]:
+        if e not in os.environ:
+            print(f"{e} is missing")
+            sys.exit(1)
+
+
 def main():
+    chek_env()
     api_instance = client.CustomObjectsApi()
     group = "azure.cosmotech.com"  # Update to the correct API group
     version = "v1"  # Update to the correct API version
@@ -126,6 +148,20 @@ def main():
 
     # Watch for events on custom resource
     resource_version = ""
+    subscription = os.environ.get("AZURE_SUBSCRIPTION")
+    credential = ClientSecretCredential(
+        client_id=os.environ.get("CLIENT_ID"),
+        tenant_id=os.environ.get("TENANT_ID"),
+        client_secret=os.environ.get("CLIENT_SECRET"),
+    )
+    kusto_client = KustoManagementClient(
+        credential=credential,
+        subscription_id=subscription,
+    )
+    iam_client = AuthorizationManagementClient(
+        credential=credential,
+        subscription_id=subscription,
+    )
     while True:
         stream = watch.Watch().stream(
             api_instance.list_namespaced_custom_object,
@@ -153,15 +189,6 @@ def main():
                 orga_id = get_org_id_by_name(organization_name=organization_name)
                 work_key = get_work_key_by_name(workspace_name=workspace_name)
                 if orga_id and work_key:
-                    subscription = os.environ.get("AZURE_SUBSCRIPTION")
-                    kusto_client = KustoManagementClient(
-                        credential=ClientSecretCredential(
-                            client_id=os.environ.get("CLIENT_ID"),
-                            tenant_id=os.environ.get("TENANT_ID"),
-                            client_secret=os.environ.get("CLIENT_SECRET"),
-                        ),
-                        subscription_id=subscription,
-                    )
                     resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
                     database_name = f"{orga_id}-{work_key}"
                     location = os.environ.get("LOCATION")
@@ -181,7 +208,6 @@ def main():
                         parameters=params_database,
                         content_type="application/json",
                     ).result()
-
                     if resource_data.get("permissions"):
                         for per in resource_data.get("permissions"):
                             delete_permission(
@@ -210,14 +236,7 @@ def main():
                     scope = f"{prefix}/resourceGroups/{resource_group_name}/providers/{resource_type}/{orga_id}-{work_key}"
                     role = f"{prefix}/providers/Microsoft.Authorization/roleDefinitions/{role_id}"
                     try:
-                        iam_client = AuthorizationManagementClient(
-                            credential=ClientSecretCredential(
-                                client_id=os.environ.get("CLIENT_ID"),
-                                tenant_id=os.environ.get("TENANT_ID"),
-                                client_secret=os.environ.get("CLIENT_SECRET"),
-                            ),
-                            subscription_id=subscription,
-                        )
+
                         iam_client.role_assignments.create(
                             scope=scope,
                             role_assignment_name=str(uuid4()),
@@ -237,14 +256,6 @@ def main():
                     scope = f"{prefix}/resourceGroups/{resource_group_name}/providers/{resource_type}/{orga_id}-{work_key}"
                     role = f"{prefix}/providers/Microsoft.Authorization/roleDefinitions/{role_id}"
                     try:
-                        iam_client = AuthorizationManagementClient(
-                            credential=ClientSecretCredential(
-                                client_id=os.environ.get("CLIENT_ID"),
-                                tenant_id=os.environ.get("TENANT_ID"),
-                                client_secret=os.environ.get("CLIENT_SECRET"),
-                            ),
-                            subscription_id=subscription,
-                        )
                         iam_client.role_assignments.create(
                             scope=scope,
                             role_assignment_name=str(uuid4()),
@@ -265,7 +276,6 @@ def main():
                         connection_string=database_uri,
                     )
                     kusto_client_new = KustoClient(kcsb=kbsc)
-
                     batching_policy = json.dumps(
                         {"MaximumBatchingTimeSpan": "00:00:10"}
                     )

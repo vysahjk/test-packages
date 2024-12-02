@@ -50,7 +50,6 @@ def get_org_id_by_name(organization_name: str):
             plural=plural,
             version=version,
         )
-        print(api_response)
         return api_response.get("spec").get("id")
     except Exception as e:
         print("Exception: %s\n" % e)
@@ -81,9 +80,17 @@ def main():
     version = "v1"  # Update to the correct API version
     namespace = "cosmotech"  # Assuming custom resource is in default namespace
     plural = "eventhubs"
-
     # Watch for events on custom resource
     resource_version = ""
+    credential = ClientSecretCredential(
+        client_id=os.environ.get("CLIENT_ID"),
+        tenant_id=os.environ.get("TENANT_ID"),
+        client_secret=os.environ.get("CLIENT_SECRET"),
+    )
+    eventhub_client = EventHubManagementClient(
+        credential=credential,
+        subscription_id=os.environ.get("AZURE_SUBSCRIPTION"),
+    )
     while True:
         stream = watch.Watch().stream(
             api_instance.list_namespaced_custom_object,
@@ -114,14 +121,6 @@ def main():
                     resource_group_name = os.environ.get("RESOURCE_GROUP_NAME")
                     namespace_name = f"{orga_id}-{work_key}"
                     location = os.environ.get("LOCATION")
-                    eventhub_client = EventHubManagementClient(
-                        credential=ClientSecretCredential(
-                            client_id=os.environ.get("CLIENT_ID"),
-                            tenant_id=os.environ.get("TENANT_ID"),
-                            client_secret=os.environ.get("CLIENT_SECRET"),
-                        ),
-                        subscription_id=os.environ.get("AZURE_SUBSCRIPTION"),
-                    )
                     # Create Namespace
                     eventhub_client.namespaces.begin_create_or_update(
                         resource_group_name=resource_group_name,
@@ -149,12 +148,14 @@ def main():
                         print("Create EventHub: {}".format(eventhub))
                         # Create Consumer Group
                         consumer_group_name = ev.get("displayName")
-                        consumer_group = eventhub_client.consumer_groups.create_or_update(
-                            resource_group_name=resource_group_name,
-                            namespace_name=namespace_name,
-                            event_hub_name=eventhub_name,
-                            consumer_group_name=consumer_group_name,
-                            parameters={"user_metadata": "New consumergroup"},
+                        consumer_group = (
+                            eventhub_client.consumer_groups.create_or_update(
+                                resource_group_name=resource_group_name,
+                                namespace_name=namespace_name,
+                                event_hub_name=eventhub_name,
+                                consumer_group_name=consumer_group_name,
+                                parameters={"user_metadata": "New consumergroup"},
+                            )
                         )
                         print("Create consumer group:\n{}".format(consumer_group))
 
