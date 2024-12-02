@@ -1,4 +1,5 @@
 import os
+import sys
 from kubernetes import client, config, watch
 from azure.identity import ClientSecretCredential
 from azure.mgmt.eventhub import EventHubManagementClient
@@ -182,6 +183,27 @@ def main():
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
 
+def check_env():
+    for e in [
+        "CLIENT_ID",
+        "CLIENT_SECRET",
+        "TENANT_ID",
+        "AZURE_SUBSCRIPTION",
+        "RESOURCE_GROUP_NAME",
+        "LOCATION",
+        "API_SCOPE",
+        "API_SCOPE_POWERBI",
+        "PLATFORM_PRINCIPAL_ID",
+        "ADX_CLUSTER_NAME",
+        "EVENTHUB_BUILT_DATA_RECEIVER",
+        "EVENTHUB_BUILT_DATA_SENDER",
+    ]:
+        if e not in os.environ:
+            print(f"{e} is missing in triskell secret")
+            sys.exit(1)
+
+
 if __name__ == "__main__":
+    check_env()
     config.load_incluster_config()  # Use in-cluster configuration
     main()

@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import sys
 import polling2
 import pathlib
 from kubernetes import client, config, watch
@@ -310,6 +311,14 @@ def main():
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
 
+def check_env():
+    for e in ["TOKEN"]:
+        if e not in os.environ:
+            print(f"{e} is missing in triskell secret")
+            sys.exit(1)
+
+
 if __name__ == "__main__":
+    check_env()
     config.load_incluster_config()  # Use in-cluster configuration
     main()
