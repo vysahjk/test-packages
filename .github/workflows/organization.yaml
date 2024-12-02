@@ -1,15 +1,15 @@
-name: Create and publish a Docker image
+name: organization
 on:
   push:
     branches:
       - main
     paths:
-      - "containers/organizations/**"
+      - "containers/organization/**"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 jobs:
-  build-and-push-organizations:
+  build-and-push-organization:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -34,7 +34,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: containers/organizations
+          context: containers/organization
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -1,15 +1,16 @@
-name: Create and publish a Docker image
+name: runner
 on:
   push:
     branches:
       - main
     paths:
-      - "containers/solutions/**"
+      - "containers/runner/**"
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+
 jobs:
-  build-and-push-solutions:
+  build-and-push-runner:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,12 +31,12 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: ${{ env.REGISTRY }}/vysahjk/triskell-solution
+          images: ${{ env.REGISTRY }}/vysahjk/triskell-runner
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          context: containers/solutions
+          context: containers/runner
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
