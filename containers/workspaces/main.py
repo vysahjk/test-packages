@@ -109,7 +109,7 @@ def get_org_id_by_name(organization_name: str):
             plural=plural,
             version=version,
         )
-        return api_response.get("spec").get("id")
+        return api_response.get("spec")
     except Exception as e:
         print("Exception: %s\n" % e)
 
@@ -171,14 +171,20 @@ def main():
                 solu_id = get_sol_id_by_name(solution_name=solution_name)
                 resource_data["solution"]["solutionId"] = solu_id
                 # retrieve org id
-                orga_id = get_org_id_by_name(organization_name=organization_name)
-                custom_resource["spec"]["organizationId"] = orga_id
+                org_spec = get_org_id_by_name(organization_name=organization_name)
+                custom_resource["spec"]["organizationId"] = org_spec
                 res_ = create(
-                    org_id=resource_data.get("organizationId", orga_id),
+                    org_id=resource_data.get("organizationId", org_spec),
                     data=resource_data,
                 )
                 try:
                     custom_resource["spec"]["id"] = res_.get("id")
+                    custom_resource["spec"]["organizationId"] = org_spec.get("id")
+                    custom_resource["spec"]['owerReferences'][0]["name"] = org_spec.get("metadata").get("name")
+                    custom_resource["spec"]['owerReferences'][0]["apiVersion"] = "test.cosmotech.com/v1"
+                    custom_resource["spec"]['owerReferences'][0]["kind"] = "Organization"
+                    custom_resource["spec"]['owerReferences'][0]["uid"] = org_spec.get("metadata").get("uid")
+                    custom_resource["spec"]['owerReferences'][0]["blockOwerDeletion"] = True
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
