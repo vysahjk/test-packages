@@ -118,7 +118,6 @@ def main():
                 res_ = None
                 if not resource_data.get("id"):
                     res_ = create(data=resource_data)
-                    custom_resource["spec"]["status"] = "CREATED"
                     custom_resource["spec"]["id"] = res_.get("id")
                 try:
                     api_instance.patch_namespaced_custom_object(
