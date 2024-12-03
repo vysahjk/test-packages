@@ -139,8 +139,8 @@ def main():
                     version=version,
                     namespace=namespace,
                     plural=plural,
-                    resource_name=resource_name,
-                    resource_version=int(custom_resource["metadata"]["resourceVersion"]) - 1,
+                    name=resource_name,
+                    resource_version=2,
                 )
                 if myobject.get("spec").get("id") == resource_data.get("id"):
                     update(org_id=resource_data.get("id"), data=resource_data)
