@@ -135,23 +135,8 @@ def main():
             elif event_type == "DELETED":
                 delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
-                myobject = json.loads(
-                    custom_resource["metadata"]["annotations"].get(
-                        "kubectl.kubernetes.io/last-applied-configuration"
-                    )
-                )
-                if myobject.get("spec").get("id") == resource_data.get("id"):
+                if resource_data.get("id"):
                     update(org_id=resource_data.get("id"), data=resource_data)
-                else:
-                    api_response = api_instance.patch_namespaced_custom_object(
-                        group,
-                        version,
-                        namespace,
-                        plural,
-                        resource_name,
-                        myobject,
-                    )
-                    print(api_response)
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
