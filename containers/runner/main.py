@@ -178,6 +178,7 @@ def main():
                 if not resource_data.get("id"):
                     res_ = create(
                         org_id=org_object.get("spec").get("id"),
+                        work_id=work_id,
                         data=resource_data,
                     )
                     custom_resource["spec"]["id"] = res_.get("id")
@@ -212,27 +213,21 @@ def main():
             elif event_type == "DELETED":
                 delete_obj(
                     org_id=resource_data.get("organizationId"),
-                    work_id=resource_data.get("id"),
+                    work_id=work_id,
+                    runner_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
                 org_object = get_org_id_by_name(organization_name=organization_name)
                 custom_resource["spec"]["organizationId"] = org_object.get("spec").get(
                     "id"
                 )
-                solu_id = get_work_id_by_name(workspace_name=workspace_name)
-                custom_resource["spec"]["workspaceId"] = solu_id
+                work_id = get_work_id_by_name(workspace_name=workspace_name)
+                custom_resource["spec"]["workspaceId"] = work_id
                 update(
                     org_id=resource_data.get("organizationId"),
-                    work_id=resource_data.get("id"),
+                    work_id=work_id,
+                    runner_id=resource_data.get("id"),
                     data=resource_data,
-                )
-                api_instance.patch_namespaced_custom_object(
-                    group,
-                    version,
-                    namespace,
-                    plural,
-                    resource_name,
-                    custom_resource,
                 )
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
