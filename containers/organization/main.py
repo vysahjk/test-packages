@@ -119,18 +119,17 @@ def main():
                     res_ = create(data=resource_data)
                     custom_resource["spec"]["status"] = "CREATED"
                     custom_resource["spec"]["id"] = res_.get("id")
-                else:
-                    try:
-                        api_instance.patch_namespaced_custom_object(
-                            group,
-                            version,
-                            namespace,
-                            plural,
-                            resource_name,
-                            custom_resource,
-                        )
-                    except ApiException as e:
-                        print("Exception when calling patch: %s\n" % e)
+                try:
+                    api_instance.patch_namespaced_custom_object(
+                        group,
+                        version,
+                        namespace,
+                        plural,
+                        resource_name,
+                        custom_resource,
+                    )
+                except ApiException as e:
+                    print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 delete_obj(org_id=resource_data.get("id"))
