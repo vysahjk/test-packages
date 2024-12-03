@@ -209,11 +209,8 @@ def check_env():
         "RESOURCE_GROUP_NAME",
         "LOCATION",
         "API_SCOPE",
-        "API_SCOPE_POWERBI",
         "PLATFORM_PRINCIPAL_ID",
         "ADX_CLUSTER_NAME",
-        "EVENTHUB_BUILT_DATA_RECEIVER",
-        "EVENTHUB_BUILT_DATA_SENDER",
     ]:
         if e not in os.environ:
             print(f"{e} is missing in triskell secret")
