@@ -1,7 +1,6 @@
 import sys
 import requests
 import os
-import json
 from kubernetes import client, config, watch
 from azure.identity import ClientSecretCredential
 from kubernetes.client.rest import ApiException
@@ -117,7 +116,6 @@ def main():
             if event_type == "ADDED":
                 res_ = None
                 if not resource_data.get("id"):
-                    del resource_data["status"]
                     res_ = create(data=resource_data)
                     custom_resource["spec"]["id"] = res_.get("id")
                 try:
