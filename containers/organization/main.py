@@ -32,12 +32,11 @@ def get_by_id(org_id: str):
                 "Authorization": f"Bearer {token}",
             },
         )
-        if response is None:
-            print("An error occurred while getting of all organisations")
         myobj = response.json()
-        return myobj.get("id")
+        return myobj.get("id", "")
     except Exception as e:
         print(e)
+        return None
 
 
 def delete_obj(org_id: str):
@@ -108,27 +107,26 @@ def main():
         for event in stream:
             custom_resource = event["object"]
             event_type = event["type"]
-            # Extract custom resource name
             resource_name = custom_resource["metadata"]["name"]
-            # Extract key-value pairs from the custom resource spec
             resource_data = custom_resource.get("spec", {})
-            # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
-                res_ = None
-                if not resource_data.get("id"):
-                    res_ = create(data=resource_data)
-                    custom_resource["spec"]["id"] = res_.get("id")
-                try:
-                    api_instance.patch_namespaced_custom_object(
-                        group,
-                        version,
-                        namespace,
-                        plural,
-                        resource_name,
-                        custom_resource,
-                    )
-                except ApiException as e:
-                    print("Exception when calling patch: %s\n" % e)
+                if "id" in resource_data:
+                    oid = get_by_id(org_id=resource_data.get("id"))
+                    if not oid:
+                        res_ = create(data=resource_data)
+                        over = dict(custom_resource["spec"]).update(res_)
+                        custom_resource["spec"] = over
+                        try:
+                            api_instance.patch_namespaced_custom_object(
+                                group,
+                                version,
+                                namespace,
+                                plural,
+                                resource_name,
+                                custom_resource,
+                            )
+                        except ApiException as e:
+                            print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 if resource_data.get("id"):
