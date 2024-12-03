@@ -119,7 +119,6 @@ def main():
                 if not resource_data.get("id"):
                     del resource_data["status"]
                     res_ = create(data=resource_data)
-                    custom_resource["spec"]["status"] = "CREATED"
                     custom_resource["spec"]["id"] = res_.get("id")
                 try:
                     api_instance.patch_namespaced_custom_object(
@@ -134,7 +133,8 @@ def main():
                     print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
-                delete_obj(org_id=resource_data.get("id"))
+                if resource_data.get("id"):
+                    delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
                 if resource_data.get("id"):
                     update(org_id=resource_data.get("id"), data=resource_data)
