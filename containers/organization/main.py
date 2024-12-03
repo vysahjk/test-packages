@@ -137,19 +137,6 @@ def main():
                 if resource_data.get("id"):
                     resource_data["status"] = "MODIFIED"
                     update(org_id=resource_data.get("id"), data=resource_data)
-                else:
-                    del resource_data["id"]
-                    res_ = create(data=resource_data)
-                    custom_resource["spec"]["id"] = res_.get("id")
-                    custom_resource["spec"]["status"] = "CREATED"
-                    api_instance.patch_namespaced_custom_object(
-                        group,
-                        version,
-                        namespace,
-                        plural,
-                        resource_name,
-                        custom_resource,
-                    )
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
