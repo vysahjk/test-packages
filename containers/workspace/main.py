@@ -204,23 +204,10 @@ def main():
                 )
             elif event_type == "MODIFIED":
                 org_object = get_org_id_by_name(organization_name=organization_name)
-                custom_resource["spec"]["organizationId"] = org_object.get("spec").get(
-                    "id"
-                )
-                solu_id = get_sol_id_by_name(solution_name=solution_name)
-                custom_resource["spec"]["solution"]["solutionId"] = solu_id
                 update(
                     org_id=resource_data.get("organizationId"),
                     work_id=resource_data.get("id"),
                     data=resource_data,
-                )
-                api_instance.patch_namespaced_custom_object(
-                    group,
-                    version,
-                    namespace,
-                    plural,
-                    resource_name,
-                    custom_resource,
                 )
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]

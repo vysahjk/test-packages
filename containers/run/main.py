@@ -95,7 +95,7 @@ def start_runner(org_id: str, work_id: str, runner_id: str):
         print(e)
 
 
-def create(org_id: str, work_id: str, runner_id: str, data: dict):
+def create(org_id: str, work_id: str, runner_id: str, data: dict) -> dict:
     token = get_azure_token()
     url = os.environ.get("API_URL")
     try:
@@ -173,7 +173,6 @@ def main():
         for event in stream:
             custom_resource = event["object"]
             event_type = event["type"]
-            # Extract custom resource name
             resource_name = custom_resource["metadata"]["name"]
             organization_name = (
                 custom_resource["spec"].get("selector", {}).get("organization", "")
@@ -181,9 +180,7 @@ def main():
             workspace_name = (
                 custom_resource["spec"].get("selector", {}).get("workspace", "")
             )
-            # Extract key-value pairs from the custom resource spec
             resource_data = custom_resource.get("spec", {})
-            # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
                 # retrieve solution id
                 work_id = get_work_id_by_name(workspace_name=workspace_name)
@@ -194,11 +191,12 @@ def main():
                     "id"
                 )
                 if not resource_data.get("id"):
-                    res_ = create(
+                    res_: dict = create(
                         org_id=org_object.get("spec").get("id"),
                         data=resource_data,
                     )
-                    custom_resource["spec"]["id"] = res_.get("id")
+                    over = dict(custom_resource["spec"]).update(**res_)
+                    custom_resource["spec"] = over
                 try:
                     del resource_data["selector"]
                     custom_resource["metadata"] = dict(

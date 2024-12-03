@@ -152,8 +152,6 @@ def main():
                 org_object = get_org_id_by_name(organization_name=organization_name)
                 res_ = None
                 if not resource_data.get("id"):
-                    print("CREATE")
-                    print(org_object)
                     res_ = create(
                         org_id=org_object.get("spec").get("id"), data=resource_data
                     )
@@ -163,18 +161,18 @@ def main():
                     custom_resource["spec"]["organizationId"] = org_object.get(
                         "spec"
                     ).get("id")
-                    # custom_resource["metadata"] = dict(
-                    #     ownerReferences=[
-                    #         dict(
-                    #             name=org_object.get("metadata").get("name"),
-                    #             apiVersion="api.cosmotech.com/v1",
-                    #             kind="Organization",
-                    #             uid=org_object.get("metadata").get("uid"),
-                    #             blockOwnerDeletion=True,
-                    #         )
-                    #     ],
-                    #     **custom_resource["metadata"],
-                    # )
+                    custom_resource["metadata"] = dict(
+                        ownerReferences=[
+                            dict(
+                                name=org_object.get("metadata").get("name"),
+                                apiVersion="api.cosmotech.com/v1",
+                                kind="Organization",
+                                uid=org_object.get("metadata").get("uid"),
+                                blockOwnerDeletion=True,
+                            )
+                        ],
+                        **custom_resource["metadata"],
+                    )
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
