@@ -114,8 +114,7 @@ def main():
                     oid = get_by_id(org_id=resource_data.get("id"))
                     if not oid:
                         res_ = create(data=resource_data)
-                        over = dict(custom_resource["spec"]).update(res_)
-                        custom_resource["spec"] = over
+                        custom_resource["spec"]["id"] = res_.get("id")
                         try:
                             api_instance.patch_namespaced_custom_object(
                                 group,
