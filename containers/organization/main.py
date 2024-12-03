@@ -1,6 +1,7 @@
 import sys
 import requests
 import os
+import json
 from kubernetes import client, config, watch
 from azure.identity import ClientSecretCredential
 from kubernetes.client.rest import ApiException
@@ -134,13 +135,10 @@ def main():
             elif event_type == "DELETED":
                 delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
-                myobject = api_instance.get_namespaced_custom_object(
-                    group=group,
-                    version=version,
-                    namespace=namespace,
-                    plural=plural,
-                    name=resource_name,
-                    resource_version=2,
+                myobject = json.loads(
+                    custom_resource["metadata"]["annotations"].get(
+                        "kubectl.kubernetes.io/last-applied-configuration"
+                    )
                 )
                 if myobject.get("spec").get("id") == resource_data.get("id"):
                     update(org_id=resource_data.get("id"), data=resource_data)
