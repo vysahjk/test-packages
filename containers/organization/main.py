@@ -140,8 +140,16 @@ def main():
                 else:
                     del resource_data["id"]
                     res_ = create(data=resource_data)
-                    resource_data["status"] = "CREATED"
                     custom_resource["spec"]["id"] = res_.get("id")
+                    custom_resource["spec"]["status"] = "CREATED"
+                    api_instance.patch_namespaced_custom_object(
+                        group,
+                        version,
+                        namespace,
+                        plural,
+                        resource_name,
+                        custom_resource,
+                    )
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
