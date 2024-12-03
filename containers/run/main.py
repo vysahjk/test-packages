@@ -77,6 +77,24 @@ def update(org_id: str, work_id: str, runner_id: str, run_id: str, data: dict):
         print(e)
 
 
+def start_runner(org_id: str, work_id: str, runner_id: str):
+    token = get_azure_token()
+    url = os.environ.get("API_URL")
+    try:
+        response = requests.post(
+            url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}/start",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}",
+            },
+        )
+        if response is None:
+            print("An error occurred while getting of all organisations")
+        return response.json()
+    except Exception as e:
+        print(e)
+
+
 def create(org_id: str, work_id: str, runner_id: str, data: dict):
     token = get_azure_token()
     url = os.environ.get("API_URL")
@@ -203,15 +221,21 @@ def main():
                         resource_name,
                         custom_resource,
                     )
+                    start_runner(
+                        org_id=org_object.get("spec").get("id"),
+                        work_id=work_id,
+                        runner_id=custom_resource["spec"]["id"],
+                    )
                 except ApiException as e:
                     print("Exception when calling patch: %s\n" % e)
+
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 delete_obj(
                     org_id=resource_data.get("organizationId"),
                     work_id=resource_data.get("workspaceId"),
-                    runner_id=resource_data.get('runnerId'),
-                    run_id=resource_data.get('id')
+                    runner_id=resource_data.get("runnerId"),
+                    run_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
                 work_id = get_work_id_by_name(workspace_name=workspace_name)
