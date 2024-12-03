@@ -119,15 +119,8 @@ def main():
                 if not resource_data.get("id"):
                     del resource_data["status"]
                     res_ = create(data=resource_data)
+                    custom_resource["spec"]["status"] = "CREATED"
                     custom_resource["spec"]["id"] = res_.get("id")
-                    custom_resource["metadata"] = dict(
-                        labels=dict(
-                            name=resource_name,
-                            id=res_.get("id"),
-                            status="DEPLOYED",
-                        ),
-                        **custom_resource["metadata"],
-                    )
                 try:
                     api_instance.patch_namespaced_custom_object(
                         group,
@@ -144,17 +137,7 @@ def main():
                 delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
                 if resource_data.get("id"):
-                    myobjid = custom_resource["metadata"].get("labels").get("id")
-                    update(org_id=myobjid, data=resource_data)
-                    custom_resource["spec"]["id"] = myobjid
-                    api_instance.patch_namespaced_custom_object(
-                        group,
-                        version,
-                        namespace,
-                        plural,
-                        resource_name,
-                        custom_resource,
-                    )
+                    update(org_id=resource_data.get("id"), data=resource_data)
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
