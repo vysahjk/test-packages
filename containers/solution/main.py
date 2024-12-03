@@ -148,9 +148,12 @@ def main():
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
+                print("ADDED")
                 org_object = get_org_id_by_name(organization_name=organization_name)
                 res_ = None
                 if not resource_data.get("id"):
+                    print("CREATE")
+                    print(org_object)
                     res_ = create(
                         org_id=org_object.get("spec").get("id"), data=resource_data
                     )
