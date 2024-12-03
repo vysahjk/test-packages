@@ -160,6 +160,18 @@ def main():
                     custom_resource["spec"]["organizationId"] = org_object.get(
                         "spec"
                     ).get("id")
+                    custom_resource["metadata"] = dict(
+                        ownerReferences=[
+                            dict(
+                                name=org_object.get("metadata").get("name"),
+                                apiVersion="api.cosmotech.com/v1",
+                                kind="Organization",
+                                uid=org_object.get("metadata").get("uid"),
+                                blockOwnerDeletion=True,
+                            )
+                        ],
+                        **custom_resource["metadata"],
+                    )
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
