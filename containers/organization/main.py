@@ -137,6 +137,11 @@ def main():
                 if resource_data.get("id"):
                     resource_data["status"] = "MODIFIED"
                     update(org_id=resource_data.get("id"), data=resource_data)
+                else:
+                    del resource_data["id"]
+                    res_ = create(data=resource_data)
+                    resource_data["status"] = "CREATED"
+                    custom_resource["spec"]["id"] = res_.get("id")
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
