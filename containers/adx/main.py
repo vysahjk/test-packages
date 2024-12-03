@@ -210,7 +210,7 @@ def main():
                             print("permission added")
                     principal_id = os.environ.get("ADX_CLUSTER_PRINCIPAL_ID")
                     resource_type = "Microsoft.EventHub/Namespaces"
-                    role_id = os.environ.get("EVENTHUB_BUILT_DATA_RECEIVER")
+                    role_id = os.environ.get("EVENTHUB_BUILT_DATA_RECEIVER", 'a638d3c7-ab3a-418d-83e6-5f17a39d4fde')
                     prefix = f"/subscriptions/{subscription}"
                     scope = f"{prefix}/resourceGroups/{resource_group_name}/providers/{resource_type}/{orga_id}-{work_key}"
                     role = f"{prefix}/providers/Microsoft.Authorization/roleDefinitions/{role_id}"
@@ -230,7 +230,7 @@ def main():
 
                     principal_id = os.environ.get("PLATFORM_PRINCIPAL_ID")
                     resource_type = "Microsoft.EventHub/Namespaces"
-                    role_id = os.environ.get("EVENTHUB_BUILT_DATA_SENDER")
+                    role_id = os.environ.get("EVENTHUB_BUILT_DATA_SENDER", "2b629674-e913-4c01-ae53-ef4638d8f975")
                     prefix = f"/subscriptions/{subscription}"
                     scope = f"{prefix}/resourceGroups/{resource_group_name}/providers/{resource_type}/{orga_id}-{work_key}"
                     role = f"{prefix}/providers/Microsoft.Authorization/roleDefinitions/{role_id}"
@@ -342,7 +342,6 @@ def check_env():
         "RESOURCE_GROUP_NAME",
         "LOCATION",
         "API_SCOPE",
-        "API_SCOPE_POWERBI",
         "PLATFORM_PRINCIPAL_ID",
         "ADX_CLUSTER_NAME",
         "EVENTHUB_BUILT_DATA_RECEIVER",
