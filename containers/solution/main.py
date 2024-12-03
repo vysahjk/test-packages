@@ -142,7 +142,7 @@ def main():
             # Extract custom resource name
             resource_name = custom_resource["metadata"]["name"]
             organization_name = (
-                custom_resource["spec"].get("selector").get("organization", "")
+                custom_resource["spec"].get("selector", {}).get("organization", "")
             )
             # Extract key-value pairs from the custom resource spec
             resource_data = custom_resource.get("spec", {})
@@ -160,18 +160,6 @@ def main():
                     custom_resource["spec"]["organizationId"] = org_object.get(
                         "spec"
                     ).get("id")
-                    custom_resource["metadata"] = dict(
-                        ownerReferences=[
-                            dict(
-                                name=org_object.get("metadata").get("name"),
-                                apiVersion="api.cosmotech.com/v1",
-                                kind="Organization",
-                                uid=org_object.get("metadata").get("uid"),
-                                blockOwnerDeletion=True,
-                            )
-                        ],
-                        **custom_resource["metadata"],
-                    )
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
@@ -184,15 +172,13 @@ def main():
                     print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
-                org_object = get_org_id_by_name(organization_name=organization_name)
                 delete_obj(
-                    org_id=org_object.get("spec").get("id"),
+                    org_id=resource_data.get("organizationId"),
                     sol_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
-                org_object = get_org_id_by_name(organization_name=organization_name)
                 update(
-                    org_id=org_object.get("spec").get("id"),
+                    org_id=resource_data.get("organizationId"),
                     sol_id=resource_data.get("id"),
                     data=resource_data,
                 )
