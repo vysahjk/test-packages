@@ -33,7 +33,7 @@ def get_by_id(org_id: str):
             },
         )
         myobj = response.json()
-        return myobj.get("id", "")
+        return myobj
     except Exception as e:
         print(e)
         return None
@@ -110,22 +110,24 @@ def main():
             resource_name = custom_resource["metadata"]["name"]
             resource_data = custom_resource.get("spec", {})
             if event_type == "ADDED":
-                if "id" in resource_data:
-                    oid = get_by_id(org_id=resource_data.get("id"))
-                    if not oid:
-                        res_ = create(data=resource_data)
-                        custom_resource["spec"]["id"] = res_.get("id")
-                        try:
-                            api_instance.patch_namespaced_custom_object(
-                                group,
-                                version,
-                                namespace,
-                                plural,
-                                resource_name,
-                                custom_resource,
-                            )
-                        except ApiException as e:
-                            print("Exception when calling patch: %s\n" % e)
+                o = get_by_id(org_id=resource_data.get("id", ""))
+                if not o:
+                    res_ = create(data=resource_data)
+                    custom_resource["spec"]["id"] = res_.get("id")
+                    custom_resource["spec"]["name"] = res_.get("name")
+                else:
+                    custom_resource["spec"] = o
+                    try:
+                        api_instance.patch_namespaced_custom_object(
+                            group,
+                            version,
+                            namespace,
+                            plural,
+                            resource_name,
+                            custom_resource,
+                        )
+                    except ApiException as e:
+                        print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 if resource_data.get("id"):
