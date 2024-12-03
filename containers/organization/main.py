@@ -135,6 +135,12 @@ def main():
             elif event_type == "DELETED":
                 delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
+                myobj = (
+                    custom_resource.get("metadata")
+                    .get("annotations")
+                    .get("kubectl.kubernetes.io/last-applied-configuration")
+                )
+                print(myobj)
                 if resource_data.get("id"):
                     update(org_id=resource_data.get("id"), data=resource_data)
             # Update resource_version to resume watching from the last event
