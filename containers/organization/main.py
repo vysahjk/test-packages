@@ -133,7 +133,7 @@ def main():
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 delete_obj(org_id=resource_data.get("id"))
-            elif event_type == "MODIFIED" and resource_data.get("STATUS") == "CREATED":
+            elif event_type == "MODIFIED":
                 if resource_data.get("id"):
                     resource_data["status"] = "MODIFIED"
                     update(org_id=resource_data.get("id"), data=resource_data)
