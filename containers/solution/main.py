@@ -152,7 +152,7 @@ def main():
                 res_ = None
                 if not resource_data.get("id"):
                     res_ = create(
-                        org_id=org_object.get("spec", {}).get("id", ""), data=resource_data
+                        org_id=org_object.get("spec").get("id"), data=resource_data
                     )
                     custom_resource["spec"]["id"] = res_.get("id")
                 try:
@@ -160,18 +160,18 @@ def main():
                     custom_resource["spec"]["organizationId"] = org_object.get(
                         "spec"
                     ).get("id")
-                    custom_resource["metadata"] = dict(
-                        ownerReferences=[
-                            dict(
-                                name=org_object.get("metadata").get("name"),
-                                apiVersion="api.cosmotech.com/v1",
-                                kind="Organization",
-                                uid=org_object.get("metadata").get("uid"),
-                                blockOwnerDeletion=True,
-                            )
-                        ],
-                        **custom_resource["metadata"],
-                    )
+                    # custom_resource["metadata"] = dict(
+                    #     ownerReferences=[
+                    #         dict(
+                    #             name=org_object.get("metadata").get("name"),
+                    #             apiVersion="api.cosmotech.com/v1",
+                    #             kind="Organization",
+                    #             uid=org_object.get("metadata").get("uid"),
+                    #             blockOwnerDeletion=True,
+                    #         )
+                    #     ],
+                    #     **custom_resource["metadata"],
+                    # )
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
