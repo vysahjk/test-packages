@@ -117,6 +117,7 @@ def main():
                 res_ = None
                 if not resource_data.get("id"):
                     res_ = create(data=resource_data)
+                    resource_data["status"] = "CREATED"
                     custom_resource["spec"]["id"] = res_.get("id")
                 try:
                     api_instance.patch_namespaced_custom_object(
@@ -132,8 +133,10 @@ def main():
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 delete_obj(org_id=resource_data.get("id"))
-            elif event_type == "MODIFIED":
-                update(org_id=resource_data.get("id"), data=resource_data)
+            elif event_type == "MODIFIED" and resource_data.get("STATUS") == "CREATED":
+                if resource_data.get("id"):
+                    resource_data["status"] = "MODIFIED"
+                    update(org_id=resource_data.get("id"), data=resource_data)
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
