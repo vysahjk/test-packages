@@ -125,8 +125,8 @@ def main():
                             name=resource_name,
                             id=res_.get("id"),
                             status="DEPLOYED",
-                            **custom_resource["metadata"],
-                        )
+                        ),
+                        **custom_resource["metadata"],
                     )
                 try:
                     api_instance.patch_namespaced_custom_object(
