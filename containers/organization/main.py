@@ -32,9 +32,9 @@ def get_by_id(org_id: str):
                 "Authorization": f"Bearer {token}",
             },
         )
-        print(response.json())
-        myobj = response.json()
-        return myobj
+        if response.status_code == "404":
+            return None
+        return response.json()
     except Exception as e:
         print(e)
         return None
