@@ -44,16 +44,13 @@ def delete_obj(org_id: str, work_id: str, runner_id: str, run_id: str):
     token = get_azure_token()
     url = os.environ.get("API_URL")
     try:
-        response = requests.delete(
+        requests.delete(
             url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}/runs/{run_id}",
             headers={
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {token}",
             },
         )
-        if response is None:
-            print("An error occurred while getting of all organisations")
-        return response.json()
     except Exception as e:
         print(e)
 

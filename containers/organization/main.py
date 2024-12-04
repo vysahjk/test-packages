@@ -44,16 +44,13 @@ def get_by_id(org_id: str):
 def delete_obj(org_id: str):
     token = get_azure_token()
     url = os.environ.get("API_URL")
-    response = requests.delete(
+    requests.delete(
         url=f"{url}/organizations/{org_id}",
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Bearer {token}",
         },
     )
-    if response is None:
-        print("An error occurred while getting of all organisations")
-    return response.json()
 
 
 def update(org_id: str, data: dict):
@@ -155,15 +152,6 @@ def main():
                     ).hexdigest()
                     if custom_resource["spec"]["sha"] == challenge:
                         update(org_id=resource_data.get("id"), data=resource_data)
-                custom_resource["spec"]["id"] = custom_resource["metadata"]["challenge"]
-                api_instance.patch_namespaced_custom_object(
-                    group,
-                    version,
-                    namespace,
-                    plural,
-                    resource_name,
-                    custom_resource,
-                )
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
