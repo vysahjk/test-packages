@@ -91,7 +91,7 @@ def main():
     api_instance = client.CustomObjectsApi()
     group = "api.cosmotech.com"  # Update to the correct API group
     version = "v1"  # Update to the correct API version
-    namespace = "cosmotech"  # Assuming custom resource is in default namespace
+    namespace = os.environ.get("NAMESPACE")  # Assuming custom resource is in default namespace
     plural = "organizations"
 
     # Watch for events on custom resource
@@ -153,6 +153,7 @@ def check_env():
         "API_SCOPE",
         "PLATFORM_PRINCIPAL_ID",
         "ADX_CLUSTER_NAME",
+        "NAMESPACE"
     ]:
         if e not in os.environ:
             print(f"{e} is missing in triskell secret")

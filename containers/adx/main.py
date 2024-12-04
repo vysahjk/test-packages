@@ -53,7 +53,7 @@ def get_org_id_by_name(organization_name: str):
     api_instance = client.CustomObjectsApi()
     group = "api.cosmotech.com"  # Update to the correct API group
     version = "v1"  # Update to the correct API version
-    namespace = "cosmotech"  # Assuming custom resource is in default namespace
+    namespace = os.environ.get("NAMESPACE")  # Assuming custom resource is in default namespace
     plural = "organizations"
     try:
         api_response = api_instance.get_namespaced_custom_object(
@@ -73,7 +73,7 @@ def get_work_key_by_name(workspace_name: str):
     api_instance = client.CustomObjectsApi()
     group = "api.cosmotech.com"  # Update to the correct API group
     version = "v1"  # Update to the correct API version
-    namespace = "cosmotech"  # Assuming custom resource is in default namespace
+    namespace = os.environ.get("NAMESPACE")  # Assuming custom resource is in default namespace
     plural = "workspaces"
     try:
         api_response = api_instance.get_namespaced_custom_object(
@@ -122,7 +122,7 @@ def main():
     api_instance = client.CustomObjectsApi()
     group = "azure.cosmotech.com"  # Update to the correct API group
     version = "v1"  # Update to the correct API version
-    namespace = "cosmotech"  # Assuming custom resource is in default namespace
+    namespace = os.environ.get("NAMESPACE")  # Assuming custom resource is in default namespace
     plural = "adxdatabases"
 
     # Watch for events on custom resource
@@ -344,6 +344,7 @@ def check_env():
         "API_SCOPE",
         "PLATFORM_PRINCIPAL_ID",
         "ADX_CLUSTER_NAME",
+        "NAMESPACE"
     ]:
         if e not in os.environ:
             print(f"{e} is missing in triskell secret")
