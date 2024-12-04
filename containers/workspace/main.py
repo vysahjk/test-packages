@@ -32,12 +32,12 @@ def get_by_id(org_id: str, work_id: str):
                 "Authorization": f"Bearer {token}",
             },
         )
-        if response is None:
-            print("An error occurred while getting of all organisations")
-        myobj = response.json()
-        return myobj.get("id")
+        if response.status_code == 404:
+            return None
+        return response.json()
     except Exception as e:
         print(e)
+        return None
 
 
 def delete_obj(org_id: str, work_id: str):
@@ -157,6 +157,7 @@ def main():
             event_type = event["type"]
             # Extract custom resource name
             resource_name = custom_resource["metadata"]["name"]
+            myuid = custom_resource["metadata"]["uid"]
             organization_name = (
                 custom_resource["spec"].get("selector", {}).get("organization", "")
             )
@@ -167,25 +168,38 @@ def main():
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
-                # retrieve solution id
+                del resource_data["selector"]
                 solu_id = get_sol_id_by_name(solution_name=solution_name)
-                custom_resource["spec"]["solution"]["solutionId"] = solu_id
-                # retrieve org id
                 org_object = get_org_id_by_name(organization_name=organization_name)
-                custom_resource["spec"]["organizationId"] = org_object.get("spec").get(
-                    "id"
+                o = get_by_id(
+                    org_id=org_object.get("spec").get("id"),
+                    work_id=resource_data.get("id", ""),
                 )
-                if not resource_data.get("id"):
+                if not o:
                     res_ = create(
                         org_id=org_object.get("spec").get("id"),
                         data=resource_data,
                     )
                     custom_resource["spec"]["id"] = res_.get("id")
-                try:
-                    del resource_data["selector"]
+                    custom_resource["spec"]["uid"] = myuid
+                    custom_resource["spec"]["name"] = res_.get("name")
+                    custom_resource["spec"]["solution"]["solutionId"] = solu_id
                     custom_resource["spec"]["organizationId"] = org_object.get(
                         "spec"
                     ).get("id")
+                    custom_resource["metadata"] = dict(
+                        ownerReferences=[
+                            dict(
+                                name=org_object.get("metadata").get("name"),
+                                apiVersion="api.cosmotech.com/v1",
+                                kind="Organization",
+                                uid=org_object.get("metadata").get("uid"),
+                                blockOwnerDeletion=True,
+                            )
+                        ],
+                        **custom_resource["metadata"],
+                    )
+                try:
                     api_instance.patch_namespaced_custom_object(
                         group,
                         version,
@@ -203,7 +217,6 @@ def main():
                     work_id=resource_data.get("id"),
                 )
             elif event_type == "MODIFIED":
-                org_object = get_org_id_by_name(organization_name=organization_name)
                 update(
                     org_id=resource_data.get("organizationId"),
                     work_id=resource_data.get("id"),

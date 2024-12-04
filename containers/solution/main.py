@@ -34,10 +34,9 @@ def get_by_id(org_id: str, sol_id: str):
                 "Authorization": f"Bearer {token}",
             },
         )
-        if response is None:
-            print("An error occurred while getting of all organisations")
-        myobj = response.json()
-        return myobj.get("id")
+        if response.status_code == 404:
+            return None
+        return response.json()
     except Exception as e:
         print("Exception: %s\n" % e)
         return None
@@ -141,6 +140,7 @@ def main():
             event_type = event["type"]
             # Extract custom resource name
             resource_name = custom_resource["metadata"]["name"]
+            myuid = custom_resource["metadata"]["uid"]
             organization_name = (
                 custom_resource["spec"].get("selector", {}).get("organization", "")
             )
@@ -148,19 +148,24 @@ def main():
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
-                print("ADDED")
+                del resource_data["selector"]
                 org_object = get_org_id_by_name(organization_name=organization_name)
-                res_ = None
-                if not resource_data.get("id"):
-                    res_ = create(
-                        org_id=org_object.get("spec").get("id"), data=resource_data
-                    )
-                    custom_resource["spec"]["id"] = res_.get("id")
+                o = get_by_id(
+                    org_id=org_object.get("spec").get("id"),
+                    sol_id=resource_data.get("id", ""),
+                )
+                if not o:
+                    if not resource_data.get("id"):
+                        res_ = create(
+                            org_id=org_object.get("spec").get("id"), data=resource_data
+                        )
+                        custom_resource["spec"]["id"] = res_.get("id")
+                        custom_resource["spec"]["uid"] = myuid
+                        custom_resource["spec"]["name"] = res_.get("name")
+                        custom_resource["spec"]["organizationId"] = org_object.get(
+                            "spec"
+                        ).get("id")
                 try:
-                    del resource_data["selector"]
-                    custom_resource["spec"]["organizationId"] = org_object.get(
-                        "spec"
-                    ).get("id")
                     custom_resource["metadata"] = dict(
                         ownerReferences=[
                             dict(
