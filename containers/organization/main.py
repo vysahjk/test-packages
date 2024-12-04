@@ -1,4 +1,5 @@
 import sys
+import hashlib
 import requests
 import os
 from kubernetes import client, config, watch
@@ -91,7 +92,9 @@ def main():
     api_instance = client.CustomObjectsApi()
     group = "api.cosmotech.com"  # Update to the correct API group
     version = "v1"  # Update to the correct API version
-    namespace = os.environ.get("NAMESPACE")  # Assuming custom resource is in default namespace
+    namespace = os.environ.get(
+        "NAMESPACE"
+    )  # Assuming custom resource is in default namespace
     plural = "organizations"
 
     # Watch for events on custom resource
@@ -115,8 +118,10 @@ def main():
                 o = get_by_id(org_id=resource_data.get("id", ""))
                 if not o:
                     res_ = create(data=resource_data)
+                    p = hashlib.sha1(res_.get("id")).hexdigest()
                     custom_resource["spec"]["id"] = res_.get("id")
                     custom_resource["spec"]["uid"] = myuid
+                    custom_resource["metadata"]["sha"] = p
                     custom_resource["spec"]["name"] = res_.get("name")
                 else:
                     custom_resource["spec"]["id"] = o.get("id")
@@ -134,10 +139,14 @@ def main():
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 if resource_data.get("id"):
-                    delete_obj(org_id=resource_data.get("id"))
+                    challenge = hashlib.sha1(resource_data.get("id")).hexdigest()
+                    if custom_resource["metadata"]["sha"] == challenge:
+                        delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
                 if resource_data.get("id"):
-                    update(org_id=resource_data.get("id"), data=resource_data)
+                    challenge = hashlib.sha1(resource_data.get("id")).hexdigest()
+                    if custom_resource["metadata"]["sha"] == challenge:
+                        update(org_id=resource_data.get("id"), data=resource_data)
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
@@ -153,7 +162,7 @@ def check_env():
         "API_SCOPE",
         "PLATFORM_PRINCIPAL_ID",
         "ADX_CLUSTER_NAME",
-        "NAMESPACE"
+        "NAMESPACE",
     ]:
         if e not in os.environ:
             print(f"{e} is missing in triskell secret")
