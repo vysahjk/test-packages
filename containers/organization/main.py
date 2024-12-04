@@ -32,7 +32,6 @@ def get_by_id(org_id: str):
                 "Authorization": f"Bearer {token}",
             },
         )
-        print(response.status_code)
         if response.status_code == 404:
             return None
         return response.json()
@@ -110,12 +109,14 @@ def main():
             custom_resource = event["object"]
             event_type = event["type"]
             resource_name = custom_resource["metadata"]["name"]
+            myuid = custom_resource["metadata"]["uid"]
             resource_data = custom_resource.get("spec", {})
             if event_type == "ADDED":
                 o = get_by_id(org_id=resource_data.get("id", ""))
                 if not o:
                     res_ = create(data=resource_data)
                     custom_resource["spec"]["id"] = res_.get("id")
+                    custom_resource["spec"]["uid"] = myuid
                     custom_resource["spec"]["name"] = res_.get("name")
                 else:
                     custom_resource["spec"]["id"] = o.get("id")
