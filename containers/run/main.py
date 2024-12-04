@@ -77,24 +77,6 @@ def update(org_id: str, work_id: str, runner_id: str, run_id: str, data: dict):
         print(e)
 
 
-def start_runner(org_id: str, work_id: str, runner_id: str):
-    token = get_azure_token()
-    url = os.environ.get("API_URL")
-    try:
-        response = requests.post(
-            url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}/start",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
-        )
-        if response is None:
-            print("An error occurred while getting of all organisations")
-        return response.json()
-    except Exception as e:
-        print(e)
-
-
 def create(org_id: str, work_id: str, runner_id: str, data: dict) -> dict:
     token = get_azure_token()
     url = os.environ.get("API_URL")
@@ -218,11 +200,6 @@ def main():
                         plural,
                         resource_name,
                         custom_resource,
-                    )
-                    start_runner(
-                        org_id=org_object.get("spec").get("id"),
-                        work_id=work_id,
-                        runner_id=custom_resource["spec"]["id"],
                     )
                 except ApiException as e:
                     print("Exception when calling patch: %s\n" % e)

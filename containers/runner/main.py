@@ -77,6 +77,22 @@ def update(org_id: str, work_id: str, runner_id: str, data: dict):
         print(e)
 
 
+def start_runner(org_id: str, work_id: str, runner_id: str):
+    token = get_azure_token()
+    url = os.environ.get("API_URL")
+    try:
+        response = requests.post(
+            url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}/start",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {token}",
+            },
+        )
+        return response.json()
+    except Exception as e:
+        print(e)
+
+
 def create(org_id: str, work_id: str, data: dict):
     token = get_azure_token()
     url = os.environ.get("API_URL")
@@ -167,10 +183,11 @@ def main():
             resource_data = custom_resource.get("spec", {})
             # Handle events of type ADDED (resource created)
             if event_type == "ADDED":
-                # retrieve solution id
+                del resource_data["selector"]
+                # retrieve workspace id
                 work_id = get_work_id_by_name(workspace_name=workspace_name)
                 custom_resource["spec"]["workspaceId"] = work_id
-                # retrieve org id
+                # retrieve org
                 org_object = get_org_id_by_name(organization_name=organization_name)
                 custom_resource["spec"]["organizationId"] = org_object.get("spec").get(
                     "id"
@@ -182,11 +199,12 @@ def main():
                         data=resource_data,
                     )
                     custom_resource["spec"]["id"] = res_.get("id")
+                    start_runner(
+                        org_id=org_object.get("spec").get("id"),
+                        work_id=work_id,
+                        runner_id=res_.get("id"),
+                    )
                 try:
-                    del resource_data["selector"]
-                    custom_resource["spec"]["organizationId"] = org_object.get(
-                        "spec"
-                    ).get("id")
                     custom_resource["metadata"] = dict(
                         ownerReferences=[
                             dict(
@@ -207,6 +225,7 @@ def main():
                         resource_name,
                         custom_resource,
                     )
+
                 except ApiException as e:
                     print("Exception when calling patch: %s\n" % e)
             # Handle events of type DELETED (resource deleted)
