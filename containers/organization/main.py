@@ -121,7 +121,7 @@ def main():
                     p = hashlib.sha1(str(res_.get("id")).encode("utf-8")).hexdigest()
                     custom_resource["spec"]["id"] = res_.get("id")
                     custom_resource["spec"]["uid"] = myuid
-                    custom_resource["metadata"]["sha"] = p
+                    custom_resource["spec"]["sha"] = p
                     custom_resource["spec"]["name"] = res_.get("name")
                 else:
                     custom_resource["spec"]["id"] = o.get("id")
@@ -142,14 +142,14 @@ def main():
                     challenge = hashlib.sha1(
                         str(resource_data.get("id")).encode("utf-8")
                     ).hexdigest()
-                    if custom_resource["metadata"]["sha"] == challenge:
+                    if custom_resource["spec"]["sha"] == challenge:
                         delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
                 if resource_data.get("id"):
                     challenge = hashlib.sha1(
                         str(resource_data.get("id")).encode("utf-8")
                     ).hexdigest()
-                    if custom_resource["metadata"]["sha"] == challenge:
+                    if custom_resource["spec"]["sha"] == challenge:
                         update(org_id=resource_data.get("id"), data=resource_data)
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
