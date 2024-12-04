@@ -118,7 +118,7 @@ def main():
                 o = get_by_id(org_id=resource_data.get("id", ""))
                 if not o:
                     res_ = create(data=resource_data)
-                    p = hashlib.sha1(res_.get("id")).hexdigest()
+                    p = hashlib.sha1(str(res_.get("id")).encode("utf-8")).hexdigest()
                     custom_resource["spec"]["id"] = res_.get("id")
                     custom_resource["spec"]["uid"] = myuid
                     custom_resource["metadata"]["sha"] = p
@@ -139,12 +139,16 @@ def main():
             # Handle events of type DELETED (resource deleted)
             elif event_type == "DELETED":
                 if resource_data.get("id"):
-                    challenge = hashlib.sha1(resource_data.get("id")).hexdigest()
+                    challenge = hashlib.sha1(
+                        str(resource_data.get("id")).encode("utf-8")
+                    ).hexdigest()
                     if custom_resource["metadata"]["sha"] == challenge:
                         delete_obj(org_id=resource_data.get("id"))
             elif event_type == "MODIFIED":
                 if resource_data.get("id"):
-                    challenge = hashlib.sha1(resource_data.get("id")).hexdigest()
+                    challenge = hashlib.sha1(
+                        str(resource_data.get("id")).encode("utf-8")
+                    ).hexdigest()
                     if custom_resource["metadata"]["sha"] == challenge:
                         update(org_id=resource_data.get("id"), data=resource_data)
             # Update resource_version to resume watching from the last event
