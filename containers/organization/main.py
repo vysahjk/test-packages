@@ -32,6 +32,7 @@ def get_by_id(org_id: str):
                 "Authorization": f"Bearer {token}",
             },
         )
+        print(response.json())
         myobj = response.json()
         return myobj
     except Exception as e:
