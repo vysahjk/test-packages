@@ -155,6 +155,15 @@ def main():
                     ).hexdigest()
                     if custom_resource["spec"]["sha"] == challenge:
                         update(org_id=resource_data.get("id"), data=resource_data)
+                    custom_resource["spec"]["id"] = custom_resource["metadata"]["challenge"]
+                    api_instance.patch_namespaced_custom_object(
+                        group,
+                        version,
+                        namespace,
+                        plural,
+                        resource_name,
+                        custom_resource,
+                    )
             # Update resource_version to resume watching from the last event
             resource_version = custom_resource["metadata"]["resourceVersion"]
 
