@@ -120,6 +120,7 @@ def main():
                     res_ = create(data=resource_data)
                     p = hashlib.sha1(str(res_.get("id")).encode("utf-8")).hexdigest()
                     custom_resource["spec"]["id"] = res_.get("id")
+                    custom_resource["metadata"]["labels"]["challenge"] = res_.get("id")
                     custom_resource["spec"]["uid"] = myuid
                     custom_resource["spec"]["sha"] = p
                     custom_resource["spec"]["name"] = res_.get("name")
