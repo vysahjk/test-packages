@@ -33,7 +33,7 @@ def get_by_id(org_id: str):
             },
         )
         print(response.status_code)
-        if response.status_code == "400":
+        if response.status_code == 404:
             return None
         return response.json()
     except Exception as e:
