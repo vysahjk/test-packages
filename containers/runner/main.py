@@ -22,15 +22,12 @@ def get_azure_token(scope: str = "default") -> str:
 
 
 def get_by_id(org_id: str, work_id: str, runner_id: str):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     try:
         response = requests.get(
             url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
+            headers=headers,
         )
         if response is None:
             print("An error occurred while getting of all organisations")
@@ -41,30 +38,24 @@ def get_by_id(org_id: str, work_id: str, runner_id: str):
 
 
 def delete_obj(org_id: str, work_id: str, runner_id: str):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     try:
         requests.delete(
             url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
+            headers=headers,
         )
     except Exception as e:
         print(e)
 
 
 def update(org_id: str, work_id: str, runner_id: str, data: dict):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     try:
         response = requests.patch(
             url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
+            headers=headers,
             json=data,
         )
         if response is None:
@@ -75,15 +66,12 @@ def update(org_id: str, work_id: str, runner_id: str, data: dict):
 
 
 def start_runner(org_id: str, work_id: str, runner_id: str):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     try:
         response = requests.post(
             url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners/{runner_id}/start",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
+            headers=headers,
         )
         return response.json()
     except Exception as e:
@@ -91,15 +79,12 @@ def start_runner(org_id: str, work_id: str, runner_id: str):
 
 
 def create(org_id: str, work_id: str, data: dict):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     try:
         response = requests.post(
             url=f"{url}/organizations/{org_id}/workspaces/{work_id}/runners",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
+            headers=headers,
             json=data,
         )
         if response is None:
@@ -145,6 +130,23 @@ def get_work_id_by_name(workspace_name: str):
         return api_response.get("spec").get("id")
     except Exception as e:
         print("Exception: %s\n" % e)
+
+
+def get_headers():
+    api_key = os.environ.get("API_KEY", False)
+    if not api_key:
+        token = get_azure_token()
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+    else:
+        token = api_key
+        headers = {
+            "Content-Type": "application/json",
+            "X-CSM-API-KEY": f"{api_key}",
+        }
+    return headers
 
 
 def main():
