@@ -23,15 +23,12 @@ def get_azure_token(scope: str = "default") -> str:
 
 
 def get_by_id(org_id: str):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     try:
         response = requests.get(
             url=f"{url}/organizations/{org_id}",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
+            headers=headers,
         )
         if response.status_code == 404:
             return None
@@ -42,26 +39,20 @@ def get_by_id(org_id: str):
 
 
 def delete_obj(org_id: str):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     requests.delete(
         url=f"{url}/organizations/{org_id}",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
+        headers=headers,
     )
 
 
 def update(org_id: str, data: dict):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     response = requests.patch(
         url=f"{url}/organizations/{org_id}",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
+        headers=headers,
         json=data,
     )
     if response is None:
@@ -69,15 +60,29 @@ def update(org_id: str, data: dict):
     return response.json()
 
 
+def get_headers():
+    api_key = os.environ.get("API_KEY", False)
+    if not api_key:
+        token = get_azure_token()
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {token}",
+        }
+    else:
+        token = api_key
+        headers = {
+            "Content-Type": "application/json",
+            "X-CSM-API-KEY": f"{api_key}",
+        }
+    return headers
+
+
 def create(data: dict):
-    token = get_azure_token()
+    headers = get_headers()
     url = os.environ.get("API_URL")
     response = requests.post(
         url=f"{url}/organizations",
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
+        headers=headers,
         json=data,
     )
     if response is None:
@@ -158,6 +163,7 @@ def main():
 
 def check_env():
     for e in [
+        "API_KEY",
         "CLIENT_ID",
         "CLIENT_SECRET",
         "TENANT_ID",
